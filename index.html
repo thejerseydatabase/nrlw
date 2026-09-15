@@ -336,6 +336,7 @@ async function loadLiveData(){
     MATCHES = live;
     populateFacets();
     updateStatLine();
+    setDefaultYear();
     setDefaultStatus();
     applyFilters();
     const now = new Date().toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
@@ -384,6 +385,13 @@ function isPlayed(m){ return m.homeScore !== null && m.homeScore !== undefined &
 // Default to Results if any games have been played yet, otherwise Fixtures (nothing to show in Results).
 function setDefaultStatus(){
   fStatus.value = MATCHES.some(isPlayed) ? 'results' : 'fixtures';
+}
+// Default to the most recent season - a full multi-year history shouldn't require scrolling
+// past everything older just to see the current one. Only called on initial/live-data load,
+// never from populateFacets' per-filter refresh, so it never clobbers a year the user picked.
+function setDefaultYear(){
+  const latest = uniqueSorted(MATCHES, m => m.year, true)[0];
+  fYear.value = latest !== undefined ? String(latest) : '';
 }
 function resultFor(m, side){
   if(!isPlayed(m)) return null;
@@ -697,6 +705,7 @@ function renderJerseyStats(){
 // ---------- init ----------
 populateFacets();
 updateStatLine();
+setDefaultYear();
 setDefaultStatus();
 applyFilters();
 loadLiveData();

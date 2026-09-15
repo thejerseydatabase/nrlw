@@ -130,11 +130,12 @@
   .no-results{padding:32px 16px;text-align:center;color:var(--text-dim);font-size:13.5px;}
   .list-scroll{max-height:640px;overflow-y:auto;}
 
+  .jname-short{display:none;}
   @media (max-width:760px){
-    .list-head, .row{grid-template-columns:60px 1fr 24px 10px 24px 1fr;}
-    .list-head span:nth-child(2), .list-head span:nth-child(8), .list-head span:nth-child(9),
-    .row .c-hjersey, .row .c-ajersey, .row .c-round{display:none;}
-    .list-head span:nth-child(7), .row .c-round{display:none;}
+    .list-head, .row{grid-template-columns:48px 30px 1fr 20px 8px 20px 1fr 30px;}
+    .list-head span:nth-child(9), .row .c-round{display:none;}
+    .jname-full{display:none;}
+    .jname-short{display:inline;}
   }
   @media (max-width:600px){
     .matchup-grid{grid-template-columns:1fr;gap:16px;}
@@ -390,9 +391,20 @@ function resultFor(m, side){
 }
 function resultClass(r){ return r === 'win' ? 'result-win' : (r === 'loss' ? 'result-loss' : (r === 'draw' ? 'result-draw' : '')); }
 
-// NRL jerseys aren't a fixed set (28+ distinct names) - just show the full name as-is.
+// NRLW jerseys aren't a fixed set - just show the full name as-is.
 function jerseyCode(j){
   return j || 'Unknown';
+}
+
+// Compact form for the results list on narrow screens: an already-short acronym stays
+// as-is, a single word is clipped to 3 letters, and multiple words become initials
+// (Women in League -> WIL) so it stays recognisable without needing the full name's width.
+function jerseyAbbrev(j){
+  if(!j) return 'UNK';
+  if(/^[A-Z0-9]+$/.test(j) && j.length <= 6) return j;
+  const words = j.trim().split(/\s+/);
+  if(words.length === 1) return words[0].slice(0,3).toUpperCase();
+  return words.map(w => w[0]).join('').toUpperCase().slice(0,4);
 }
 
 // ---------- populate dropdowns from whatever's actually in the data ----------
@@ -599,13 +611,13 @@ function renderList(){
     return `
       <div class="row ${i===activeIndex?'active':''}" data-i="${i}" tabindex="0">
         <span class="c-date">${fmtDate(m.date, true)}</span>
-        <span class="jcode c-hjersey" title="${m.homeJersey || 'Unknown'} jersey">${jerseyCode(m.homeJersey)}</span>
+        <span class="jcode c-hjersey" title="${m.homeJersey || 'Unknown'} jersey"><span class="jname-full">${jerseyCode(m.homeJersey)}</span><span class="jname-short">${jerseyAbbrev(m.homeJersey)}</span></span>
         <span class="c-home ${resultClass(hr)}">${m.home}</span>
         <span class="c-hs">${played ? m.homeScore : ''}</span>
         <span class="c-dash">&ndash;</span>
         <span class="c-as">${played ? m.awayScore : ''}</span>
         <span class="c-away ${resultClass(ar)}">${m.away}</span>
-        <span class="jcode c-ajersey" title="${m.awayJersey || 'Unknown'} jersey">${jerseyCode(m.awayJersey)}</span>
+        <span class="jcode c-ajersey" title="${m.awayJersey || 'Unknown'} jersey"><span class="jname-full">${jerseyCode(m.awayJersey)}</span><span class="jname-short">${jerseyAbbrev(m.awayJersey)}</span></span>
         <span class="c-round">${roundShort}</span>
       </div>`;
   }).join('');

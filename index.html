@@ -47,6 +47,7 @@
   .hero h1{position:relative;font-family:'Anton',sans-serif;font-weight:400;font-size:clamp(32px,6vw,54px);letter-spacing:.01em;text-transform:uppercase;line-height:1.02;margin:0 0 14px;}
   .stat-line{position:relative;font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--text-dim);margin:0;}
   .stat-line b{color:var(--text);font-weight:600;}
+  .stat-label{color:var(--text-dim2);font-size:11px;text-transform:uppercase;letter-spacing:.07em;margin-right:3px;}
 
   .mode-toggle{display:flex;gap:8px;margin-bottom:16px;}
   .mode-toggle button{flex:1;padding:11px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--text);font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;cursor:pointer;}
@@ -203,7 +204,8 @@
     <div class="hero-circle"></div>
     <p class="eyebrow">NRLW Jersey Tracker</p>
     <h1>Every jersey.<br>Every era.</h1>
-    <p class="stat-line"><b id="total-count">0</b> fixtures &middot; <b id="year-range"></b> &middot; <b id="played-count">0</b> played &middot; <b id="tracked-count">0</b> results logged (<b id="tracked-pct">0</b>%) &middot; <b id="kit-count">0</b> with a photo (<b id="photo-pct">0</b>%)</p>
+    <p class="stat-line"><span class="stat-label">All-time</span> <b id="total-count-all">0</b> fixtures &middot; <b id="year-range"></b> &middot; <b id="played-count-all">0</b> played &middot; <b id="tracked-count-all">0</b> results logged (<b id="tracked-pct-all">0</b>%) &middot; <b id="kit-count-all">0</b> with a photo (<b id="photo-pct-all">0</b>%)</p>
+    <p class="stat-line" style="margin-top:4px;"><span class="stat-label">Currently showing</span> <b id="total-count">0</b> fixtures &middot; <b id="played-count">0</b> played &middot; <b id="tracked-count">0</b> results logged (<b id="tracked-pct">0</b>%) &middot; <b id="kit-count">0</b> with a photo (<b id="photo-pct">0</b>%)</p>
     <p class="stat-line" id="data-status" style="margin-top:6px;">Loading data&hellip;</p>
   </header>
 
@@ -804,9 +806,13 @@ function populateFacets(){
 }
 
 function updateStatLine(){
-
-
-  renderStats(MATCHES);
+  const s = computeStats(MATCHES);
+  document.getElementById('total-count-all').textContent = s.total;
+  document.getElementById('played-count-all').textContent = s.occurred;
+  document.getElementById('tracked-count-all').textContent = s.tracked;
+  document.getElementById('tracked-pct-all').textContent = s.trackedPct;
+  document.getElementById('kit-count-all').textContent = s.withPhoto;
+  document.getElementById('photo-pct-all').textContent = s.photoPct;
   const years = MATCHES.map(m => m.year).filter(Boolean);
   if(years.length) document.getElementById('year-range').textContent = Math.min(...years) + '\u2013' + Math.max(...years);
 }
